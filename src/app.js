@@ -1,4 +1,5 @@
 import express from 'express';
+import createError from 'http-errors';
 
 export  function createApp(){
     
@@ -12,6 +13,22 @@ export  function createApp(){
             status: "OK"
         })
     })
+
+    app.use((req, res, next) => {
+        next(createError(404, "Event not found"))
+    })
+
+    app.use((err, req, res, next) => {
+        res.status(err.status || 500).json({
+            success: false,
+            message: err.message || "Internal Server Error"
+        });
+    });
+
+
+
+
+
 
     return app
 }

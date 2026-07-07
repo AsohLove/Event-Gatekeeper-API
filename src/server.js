@@ -1,9 +1,10 @@
+import { logger } from "../lib/logger.js";
 import { createApp } from "./app.js";
+import { config } from '../src/config.js'
 
 const app = createApp()
 
-const PORT = process.env.PORT || 3000
 
-app.listen(PORT, () => {
-    console.log(`Gatekeeper api running on http://localhost:${PORT}`)
+app.listen(config.port, () => {
+    logger.info(`Gatekeeper api running on http://localhost:${config.port}`)
 })

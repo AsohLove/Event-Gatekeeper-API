@@ -1,3 +1,11 @@
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+
 CREATE TABLE IF NOT EXISTS events (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
@@ -7,6 +15,7 @@ CREATE TABLE IF NOT EXISTS events (
         check (capacity >= 0),
     seats_remaining INTEGER NOT NULL 
         check (seats_remaining >= 0),
+    organizer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     status VARCHAR(12) NOT NULL DEFAULT 'on_sale'
         check (status IN ('on_sale', 'sold_out', 'cancelled'))
 );

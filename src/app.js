@@ -2,6 +2,9 @@ import express from 'express';
 import createError from 'http-errors';
 
 import eventRouter from './routes/event-routes.js'
+import authRouter from './routes/auth-routes.js'
+import { requireAuth } from './middleware/auth-middleware.js';
+
 
 export  function createApp(){
     
@@ -16,7 +19,9 @@ export  function createApp(){
         })
     })
 
-    app.use('/events', eventRouter);
+    app.use('/auth', authRouter);
+
+    app.use('/events',requireAuth, eventRouter);
 
 
     app.use((req, res, next) => {

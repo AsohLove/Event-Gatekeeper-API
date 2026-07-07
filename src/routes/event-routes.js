@@ -1,0 +1,16 @@
+import { Router } from "express";
+
+import { validate } from '../middleware/validate-middleware.js'
+import { createEventSchema, eventIdSchema, paginationSchema } from "../../validations/event-validation.js";
+import { createNewEvent, getEvents, getSingleEvent } from "../controllers/event-controller.js";
+ 
+const router = Router();
+
+router.post('/', validate(createEventSchema), createNewEvent);
+
+router.get('/', validate(paginationSchema, "query"), getEvents);
+
+router.get('/:id', validate(eventIdSchema, "params"), getSingleEvent);
+
+
+export default router;

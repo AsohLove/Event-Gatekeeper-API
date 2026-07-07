@@ -5,7 +5,7 @@ export async function createEvent({name, venue, starts_at, capacity}){
             INSERT INTO events 
                 (name, venue, starts_at, capacity, seats_remaining)
             VALUES
-                ($1, $2. $3, $4, $4)
+                ($1, $2, $3, $4, $4)
             RETURNING *;
 
         `, [name, venue, starts_at, capacity]
@@ -36,5 +36,5 @@ export async function findEvents(after = 0, limit = 10) {
         `, [after, limit]
     );
 
-    return rows[0];
+    return rows;
 }

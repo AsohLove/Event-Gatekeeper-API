@@ -8,7 +8,13 @@ export function validate(schema, location = "body") {
             return next(createError(400, result.error.issues[0].message));
         }
 
-        req[location] = result.data;
+        if (location === "query"){
+            req.validatedQuery = result.data;
+        } else {
+
+            req[location] = result.data;
+        }
+
 
         next();
     };

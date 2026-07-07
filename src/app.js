@@ -1,6 +1,8 @@
 import express from 'express';
 import createError from 'http-errors';
 
+import eventRouter from './routes/event-routes.js'
+
 export  function createApp(){
     
     const app = express()
@@ -14,6 +16,9 @@ export  function createApp(){
         })
     })
 
+    app.use('/events', eventRouter);
+
+
     app.use((req, res, next) => {
         next(createError(404, "Event not found"))
     })
@@ -24,7 +29,6 @@ export  function createApp(){
             message: err.message || "Internal Server Error"
         });
     });
-
 
 
 

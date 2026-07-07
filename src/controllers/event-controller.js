@@ -35,7 +35,7 @@ export async function getSingleEvent(req, res, next){
 
 export async function getEvents(req, res, next){
     try {
-        const {after, limit } = req.query;
+        const {after, limit } = req.validatedQuery;
 
         const eventRows = await events.findEvents(after, limit);
 

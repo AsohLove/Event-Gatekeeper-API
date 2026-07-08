@@ -5,6 +5,8 @@ import eventRouter from './routes/event-routes.js'
 import authRouter from './routes/auth-routes.js'
 import { requireAuth } from './middleware/auth-middleware.js';
 
+import bookingRoutes from './routes/booking-routes.js';
+
 
 export  function createApp(){
     
@@ -22,6 +24,8 @@ export  function createApp(){
     app.use('/auth', authRouter);
 
     app.use('/events',requireAuth, eventRouter);
+
+    app.use('/', bookingRoutes);
 
 
     app.use((req, res, next) => {

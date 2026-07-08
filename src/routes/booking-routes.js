@@ -17,6 +17,8 @@ router.post('/events/:id/bookings',
         validate(createBookingSchema), 
         controller.createBooking);
 
+router.get('/bookings/:id', controller.getSingleBooking);
+
 
 
 export default router;

@@ -2,7 +2,7 @@ import createError from "http-errors";
 
 import { pool } from "../db/dbConnect.js";
 
-import * as booking from "../models/booking-model.js";
+import * as bookings from "../models/booking-model.js";
 
 export async function createBooking(req, res, next){
 
@@ -16,7 +16,7 @@ export async function createBooking(req, res, next){
 
         await client.query("BEGIN");
 
-        const result = await booking.reserveBookings(client, eventId, quantity);
+        const result = await bookings.reserveBookings(client, eventId, quantity);
 
         if (result.rowCount === 0) {
             throw createError(409, "Not enough seats are left")
@@ -45,5 +45,24 @@ export async function createBooking(req, res, next){
 
     } finally {
         client.release();
+    }
+}
+
+export async function getSingleBooking(req, res, next) {
+    try {
+        
+        const booking = await bookings.findBookingById(req.params.id);
+
+        if (!booking) {
+            throw createError(404, "No booking found!!!!!")
+        }
+
+        res.json({
+            success: true,
+            data: booking
+        });
+
+    } catch (err) {
+        next(err);
     }
 }

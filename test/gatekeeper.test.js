@@ -377,3 +377,54 @@ test("Bookings", async (t) => {
     });
 
 });
+
+test("Concurrent bookings: Making sure only one booking PASSES", async (t) => {
+
+    const eventResponse = await fetch(`${baseUrl}/events`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({
+            name: "Concurrency Test",
+            venue: "Rebase Hall",
+            starts_at: "2026-08-09T18:00:00Z",
+            capacity: 1
+        })
+    });
+
+    const event = await json(eventResponse)
+    const eventId = event.data.id;
+
+    const [firstBooker, secondBooker ] = await Promise.all([
+        fetch(`${baseUrl}/events/${eventId}/bookings`, {
+            method: "POST",
+            headers: authHeaders(),
+            body: JSON.stringify({
+                customer_id: customerId,
+                quantity: 1
+            })
+        }),
+
+        fetch(`${baseUrl}/events/${eventId}/bookings`, {
+            method: "POST",
+            headers: authHeaders(),
+            body: JSON.stringify({
+                customer_id: customerId,
+                quantity: 1
+            })
+        })
+
+    ])
+
+    const statuses = [firstBooker.status, secondBooker.status].sort();
+
+    assert.deepEqual(statuses, [201, 409]);
+
+    const response = await fetch(`${baseUrl}/events/${eventId}`, {
+        headers: authHeaders()
+    });
+
+    const body = await json(response)
+
+    assert.equal(body.data.seats_remaining, 0);
+
+}) 

@@ -1,0 +1,827 @@
+openapi: 3.0.3
+
+info:
+  title: Gatekeeper API
+  version: 1.0.0
+  description: |
+    Gatekeeper is a REST API for managing events and ticket bookings.
+
+    Features include:
+
+      • User Registration
+      • JWT Authentication
+      • Customer Management
+      • Event Management
+      • Transaction-safe Ticket Booking
+      • Booking Cancellation
+      • Event Bookings
+      • Keyset Pagination
+
+servers:
+  - url: http://localhost:3000
+    description: Local
+
+  - url: https://YOUR-RENDER-URL.onrender.com
+    description: Production
+
+tags:
+  - name: Health
+  - name: Authentication
+  - name: Customers
+  - name: Events
+  - name: Bookings
+
+paths:
+
+  /:
+    get:
+      tags:
+        - Health
+      summary: API information
+      description: Returns basic information about the Gatekeeper API.
+      security: []
+      responses:
+        "200":
+          description: API information
+          content:
+            application/json:
+              example:
+                success: true
+                name: Gatekeeper API: Event Ticketing and Booking
+                version: "1.0.0"
+                description: A REST API for booking events with limited capacities.
+                docs: /docs
+                health: /health
+
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health Check
+      description: Verify that the API is running.
+      security: []
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              example:
+                status: OK
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Register a new organizer account.
+      security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              example:
+                success: true
+                message: User registered successfully
+
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login
+      description: Login and receive a JWT token.
+      security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+              example:
+                success: true
+                data: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+        "401":
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /customers:
+    post:
+      tags:
+        - Customers
+      summary: Create a customer
+      description: Creates a new customer that can later book tickets.
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomerRequest"
+
+      responses:
+        "201":
+          description: Customer created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/Customer"
+
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "409":
+          description: Customer email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /customers/{id}:
+    get:
+      tags:
+        - Customers
+      summary: Get a customer
+      description: Retrieve a customer by ID.
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Customer ID
+          schema:
+            type: integer
+            example: 1
+
+      responses:
+        "200":
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/Customer"
+
+        "400":
+          description: Invalid customer ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /events:
+    post:
+      tags:
+        - Events
+      summary: Create an event
+      description: Create a new event.
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEventRequest"
+
+      responses:
+        "201":
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/Event"
+
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    get:
+      tags:
+        - Events
+      summary: List events
+      description: Returns a keyset paginated list of events.
+
+      parameters:
+        - name: after
+          in: query
+          required: false
+          description: Cursor ID used for keyset pagination.
+          schema:
+            type: integer
+            example: 0
+
+        - name: limit
+          in: query
+          required: false
+          description: Number of events to return.
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+            example: 10
+
+      responses:
+        "200":
+          description: List of events
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  - id: 1
+                    name: Node Conference
+                    venue: Douala
+                    starts_at: "2027-01-01T10:00:00Z"
+                    capacity: 100
+                    seats_remaining: 95
+                    status: on_sale
+
+                  - id: 2
+                    name: JavaScript Summit
+                    venue: Yaounde
+                    starts_at: "2027-02-10T09:00:00Z"
+                    capacity: 50
+                    seats_remaining: 50
+                    status: on_sale
+
+                nextCursor: 2
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /events/{id}:
+    get:
+      tags:
+        - Events
+      summary: Get single event
+      description: Retrieve an event by ID.
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Event ID
+          schema:
+            type: integer
+            example: 1
+
+      responses:
+        "200":
+          description: Event found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/Event"
+
+        "400":
+          description: Invalid event ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /events/{id}/bookings:
+    post:
+      tags:
+        - Bookings
+      summary: Book tickets for an event
+      description: |
+        Create a booking for an event.
+
+        Booking is transactional:
+          - Seats are reserved atomically.
+          - Overselling is impossible.
+          - Returns 409 when insufficient seats remain.
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Event ID
+          schema:
+            type: integer
+            example: 1
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookingRequest"
+
+      responses:
+        "201":
+          description: Booking created successfully
+          headers:
+            Location:
+              description: URL of the newly created booking
+              schema:
+                type: string
+                example: /bookings/7
+
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/Booking"
+
+        "400":
+          description: Invalid customer or request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "409":
+          description: Event sold out or insufficient seats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    get:
+      tags:
+        - Bookings
+      summary: List bookings for an event
+      description: Returns a keyset paginated list of bookings.
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Event ID
+          schema:
+            type: integer
+            example: 1
+
+        - name: after
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 0
+
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            example: 10
+
+      responses:
+        "200":
+          description: Event bookings
+          content:
+            application/json:
+              example:
+                success: true
+                data:
+                  - id: 1
+                    customer_id: 2
+                    quantity: 2
+                    status: confirmed
+
+                  - id: 2
+                    customer_id: 5
+                    quantity: 1
+                    status: confirmed
+
+                nextCursor: 2
+
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /bookings/{id}:
+    get:
+      tags:
+        - Bookings
+      summary: Get a booking
+      description: Retrieve a booking by ID.
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 5
+
+      responses:
+        "200":
+          description: Booking found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/Booking"
+
+        "400":
+          description: Invalid booking ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /bookings/{id}/cancel:
+    post:
+      tags:
+        - Bookings
+      summary: Cancel a booking
+      description: |
+        Cancels a confirmed booking.
+
+        Cancellation is transactional:
+
+        - Booking status becomes cancelled.
+        - Seats are restored.
+        - Double cancellation returns 409.
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 5
+
+      responses:
+        "204":
+          description: Booking cancelled successfully
+
+        "400":
+          description: Invalid booking ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "404":
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+        "409":
+          description: Booking already cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+
+security:
+  - bearerAuth: []
+
+components:
+
+  securitySchemes:
+
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          example: password123
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          example: password123
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: string
+          description: JWT Token
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        full_name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          example: john@example.com
+
+    CreateCustomerRequest:
+      type: object
+      required:
+        - full_name
+        - email
+      properties:
+        full_name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Node Conference
+        venue:
+          type: string
+          example: Douala
+        starts_at:
+          type: string
+          format: date-time
+          example: "2027-01-01T10:00:00Z"
+        capacity:
+          type: integer
+          example: 100
+        seats_remaining:
+          type: integer
+          example: 100
+        status:
+          type: string
+          enum:
+            - on_sale
+            - sold_out
+            - cancelled
+          example: on_sale
+        organizer_id:
+          type: integer
+          example: 1
+
+    CreateEventRequest:
+      type: object
+      required:
+        - name
+        - venue
+        - starts_at
+        - capacity
+      properties:
+        name:
+          type: string
+          example: Node Conference
+        venue:
+          type: string
+          example: Douala
+        starts_at:
+          type: string
+          format: date-time
+          example: "2027-01-01T10:00:00Z"
+        capacity:
+          type: integer
+          minimum: 1
+          example: 100
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 7
+        event_id:
+          type: integer
+          example: 1
+        customer_id:
+          type: integer
+          example: 3
+        quantity:
+          type: integer
+          example: 2
+        status:
+          type: string
+          example: confirmed
+        booked_at:
+          type: string
+          format: date-time
+
+    CreateBookingRequest:
+      type: object
+      required:
+        - customer_id
+        - quantity
+      properties:
+        customer_id:
+          type: integer
+          example: 2
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 2
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Event not found

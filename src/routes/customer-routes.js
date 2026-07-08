@@ -8,6 +8,7 @@ import { createCustomer, getSingleCustomer } from "../controllers/customer-contr
 const router = Router();
 
 
+
 router.post('/', validate(createCustomerSchema), createCustomer);
 
 router.get('/:id', validate(customerIdSchema, "params"), getSingleCustomer)

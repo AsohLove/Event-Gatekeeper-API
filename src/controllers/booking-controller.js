@@ -22,7 +22,7 @@ export async function createBooking(req, res, next){
             throw createError(409, "Not enough seats are left")
         }
 
-        const created = await booking.createBooking(client, eventId, customer_id, quantity);
+        const created = await bookings.createBooking(client, eventId, customer_id, quantity);
 
 
         await client.query("COMMIT");
@@ -64,5 +64,34 @@ export async function getSingleBooking(req, res, next) {
 
     } catch (err) {
         next(err);
+    }
+}
+
+export async function cancelEventBooking(req, res, next) {
+    try {
+        await bookings.cancelBooking(req.params.id);
+
+        res.sendStatus(204);
+
+    } catch (err) {
+        next(err)
+    }
+}
+
+export async function getEventBookings(req, res, next) {
+    try {
+        const eventId = Number(req.params.id);
+
+        const { after, limit } = req.validatedQuery;
+
+        const bookingRows = await bookings.getAnEventBookings(eventId, after, limit);
+
+        res.json({
+            success: true,
+            data: bookingRows,
+            nextCursor: bookingRows.length ? bookingRows.at(-1).id : null
+        });
+    } catch (err) {
+        next(err)
     }
 }

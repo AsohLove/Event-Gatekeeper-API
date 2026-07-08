@@ -3,7 +3,7 @@ import { requireAuth } from "../middleware/auth-middleware.js";
 
 import { validate } from "../middleware/validate-middleware.js";
 
-import { createBookingSchema } from "../../validations/booking-validation.js";
+import { createBookingSchema, querySchema } from "../../validations/booking-validation.js";
 
 import * as controller from "../controllers/booking-controller.js";
 
@@ -18,6 +18,12 @@ router.post('/events/:id/bookings',
         controller.createBooking);
 
 router.get('/bookings/:id', controller.getSingleBooking);
+
+router.post('/bookings/:id/cancel', controller.cancelEventBooking);
+
+router.get('/events/:id/bookings', 
+        validate(querySchema, "query"), 
+        controller.getEventBookings)
 
 
 

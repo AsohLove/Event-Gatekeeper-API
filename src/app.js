@@ -25,10 +25,11 @@ export  function createApp(){
     app.use('/auth', authRouter);
 
     app.use('/events',requireAuth, eventRouter);
+    
+    app.use('/customers', customerRoutes);
 
     app.use('/', bookingRoutes);
 
-    app.use('/customers', customerRoutes);
 
 
     app.use((req, res, next) => {

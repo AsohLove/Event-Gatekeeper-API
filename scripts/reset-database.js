@@ -1,4 +1,4 @@
-import { pool } from "../src/db/dbConnect";
+import { pool } from "../src/db/dbConnect.js";
 
 try {
     await pool.query(`

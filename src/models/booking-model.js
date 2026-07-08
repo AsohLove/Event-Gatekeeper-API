@@ -105,7 +105,7 @@ export async function cancelBooking(id){
 
 
     } catch (err) {
-        await client.query("ROLLBACK")
+        await client.query("ROLLBACK");
 
         throw err;
 

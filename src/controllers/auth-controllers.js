@@ -53,7 +53,7 @@ export async function login(req, res, next) {
 
         res.json({
             success: true,
-            token
+            data: token
         });
 
 

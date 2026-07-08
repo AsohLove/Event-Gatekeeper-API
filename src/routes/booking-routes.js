@@ -8,9 +8,7 @@ import { createBookingSchema } from "../../validations/booking-validation.js";
 import * as controller from "../controllers/booking-controller.js";
 
 
-
 const router = Router()
-
 
 
 router.use(requireAuth);

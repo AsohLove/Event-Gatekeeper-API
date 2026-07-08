@@ -1,14 +1,14 @@
 import { pool } from '../db/dbConnect.js'
 
-export async function createEvent({name, venue, starts_at, capacity}){
+export async function createEvent({name, venue, starts_at, capacity, organizer_id}){
     const { rows } = await pool.query(`
             INSERT INTO events 
-                (name, venue, starts_at, capacity, seats_remaining)
+                (name, venue, starts_at, capacity, seats_remaining, organizer_id)
             VALUES
-                ($1, $2, $3, $4, $4)
+                ($1, $2, $3, $4, $4, $5)
             RETURNING *;
 
-        `, [name, venue, starts_at, capacity]
+        `, [name, venue, starts_at, capacity, organizer_id]
     );
 
     return rows[0];

@@ -3,7 +3,7 @@ import createError from 'http-errors'
 
 export async function createNewEvent(req, res, next) {
     try {
-        const created = await events.createEvent(req.body);
+        const created = await events.createEvent({...req.body, organizer_id: req.user.id});
 
         res.status(201).json({
             success: true,

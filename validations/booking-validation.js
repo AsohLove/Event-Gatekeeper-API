@@ -27,3 +27,7 @@ export const querySchema = z.object({
         .max(100)
         .default(10)
 });
+
+export const bookingIdSchema = z.object({
+    id: z.coerce.number().int().positive()
+});

@@ -428,3 +428,57 @@ test("Concurrent bookings: Making sure only one booking PASSES", async (t) => {
     assert.equal(body.data.seats_remaining, 0);
 
 }) 
+
+test("SQL injection attempt on login fails", async () => {
+
+    const res = await fetch(`${baseUrl}/auth/login`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({
+            email: "' OR 1=1 --",
+            password: "anything"
+        })
+    });
+
+    assert.notEqual(res.status, 401);
+
+});
+
+test("SQL injection customer lookup is harmless", async () => {
+
+    const res = await fetch(
+        `${baseUrl}/customers/' OR 1=1 --`,
+        {
+            headers: authHeaders()
+        }
+    );
+
+    assert.notEqual(res.status, 500);
+
+});
+
+test("SQL injection event lookup is harmless", async () => {
+
+    const res = await fetch(
+        `${baseUrl}/events/' OR 1=1 --`,
+        {
+            headers: authHeaders()
+        }
+    );
+
+    assert.notEqual(res.status, 500);
+
+});
+
+test("SQL injection booking lookup is harmless", async () => {
+
+    const res = await fetch(
+        `${baseUrl}/bookings/' OR 1=1 --`,
+        {
+            headers: authHeaders()
+        }
+    );
+
+    assert.notEqual(res.status, 500);
+
+});

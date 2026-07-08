@@ -1,11 +1,12 @@
 import express from 'express';
 import createError from 'http-errors';
 
-import eventRouter from './routes/event-routes.js'
-import authRouter from './routes/auth-routes.js'
 import { requireAuth } from './middleware/auth-middleware.js';
 
+import eventRouter from './routes/event-routes.js'
+import authRouter from './routes/auth-routes.js'
 import bookingRoutes from './routes/booking-routes.js';
+import customerRoutes from './routes/customer-routes.js'
 
 
 export  function createApp(){
@@ -26,6 +27,8 @@ export  function createApp(){
     app.use('/events',requireAuth, eventRouter);
 
     app.use('/', bookingRoutes);
+
+    app.use('/customers', customerRoutes);
 
 
     app.use((req, res, next) => {

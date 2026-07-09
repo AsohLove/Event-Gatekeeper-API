@@ -1,1 +1,1 @@
-# EVENT GATEKEEPER API
+# Gatekeeper API

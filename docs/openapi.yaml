@@ -21,7 +21,7 @@ servers:
   - url: http://localhost:3000
     description: Local
 
-  - url: https://YOUR-RENDER-URL.onrender.com
+  - url: https://event-gatekeeper-api.onrender.com/
     description: Production
 
 tags:

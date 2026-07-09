@@ -1,7 +1,6 @@
 import express from 'express';
 import createError from 'http-errors';
 
-import { requireAuth } from './middleware/auth-middleware.js';
 
 import eventRouter from './routes/event-routes.js'
 import authRouter from './routes/auth-routes.js'
@@ -61,7 +60,7 @@ export  function createApp(){
 
     app.use('/auth', authRouter);
 
-    app.use('/events',requireAuth, eventRouter);
+    app.use('/events', eventRouter);
     
     app.use('/customers', customerRoutes);
 
@@ -70,7 +69,7 @@ export  function createApp(){
 
 
     app.use((req, res, next) => {
-        next(createError(404, "Event not found"))
+        next(createError(404, "Resource not found"))
     })
 
     app.use((err, req, res, next) => {
@@ -82,9 +81,6 @@ export  function createApp(){
             message: err.message || "Internal Server Error"
         });
     });
-
-
-
 
 
     return app

@@ -4,7 +4,7 @@ import createError from "http-errors";
 import { comparePassword } from "../../lib/password.js";
 import { createToken } from "../../lib/jwt.js";
 
-import * as events from '../models/user-model.js'
+import * as users from '../models/user-model.js'
 
 
 
@@ -16,7 +16,7 @@ export async function register(req, res, next) {
             10
         );
 
-        const user = await events.create(req.body.email, hash);
+        const user = await users.create(req.body.email, hash);
 
         res.status(201).json({
             success: true,
@@ -37,7 +37,7 @@ export async function login(req, res, next) {
         
         const {email, password } = req.body;
 
-        const user = await events.findUserByEmail(email);
+        const user = await users.findUserByEmail(email);
 
         if (!user) {
             throw createError(401, 'Invalid email or password');

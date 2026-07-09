@@ -339,6 +339,7 @@ Possible future enhancements include
 * Payment Integration
 * Organizer Dashboard
 
+---
 
 - GitHub: [@loveasoh](https://github.com/AsohLove)
 - Twitter: [@loveasoh](https://x.com/LoveTheModifier)

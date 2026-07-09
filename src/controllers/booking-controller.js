@@ -4,6 +4,8 @@ import { pool } from "../db/dbConnect.js";
 
 import * as bookings from "../models/booking-model.js";
 
+import * as events from "../models/event-model.js"
+
 export async function createBooking(req, res, next){
 
     const client = await pool.connect();
@@ -13,8 +15,15 @@ export async function createBooking(req, res, next){
         const eventId = Number(req.params.id);
 
         const { customer_id, quantity } = req.body;
-
+        
         await client.query("BEGIN");
+
+        const event = await events.findEventById(eventId);
+
+        if (!event) {
+            throw createError(404, "Event does not exist!");
+        }
+
 
         const result = await bookings.reserveBookings(client, eventId, quantity);
 
@@ -34,12 +43,12 @@ export async function createBooking(req, res, next){
                 data: created
            });
     } catch (err) {
+        
+        await client.query("ROLLBACK");
 
         if (err.code === "23503") {
             return next(createError(400, "Unknown event or customer."));
         }
-
-        await client.query("ROLLBACK");
 
         next(err)
 
@@ -81,6 +90,12 @@ export async function cancelEventBooking(req, res, next) {
 export async function getEventBookings(req, res, next) {
     try {
         const eventId = Number(req.params.id);
+
+        const event = await events.findEventById(eventId)
+
+        if (!event) {
+            throw createError(404, "Event does not exist")
+        }
 
         const { after, limit } = req.validatedQuery;
 
